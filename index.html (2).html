@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Smart Search AI — Interactive Prototype</title>
+<style>
+  /* ============ TOKENS ============ */
+  :root[data-theme="dark"]{
+    --bg-app:#0b141a;
+    --bg-page:#05080a;
+    --bg-panel:#111b21;
+    --bg-elevated:#182229;
+    --bg-input:#2a3942;
+    --bg-hover:#202c33;
+    --border:#26333c;
+    --text-primary:#e9edef;
+    --text-secondary:#8696a0;
+    --text-tertiary:#667781;
+    --accent:#00a884;
+    --accent-dark:#005c4b;
+    --accent-contrast:#0b141a;
+    --mark-bg:rgba(0,168,132,0.28);
+    --mark-text:#c9f4e7;
+    --shadow-frame: 0 40px 90px -20px rgba(0,0,0,0.65), 0 10px 30px -10px rgba(0,0,0,0.5);
+  }
+  :root[data-theme="light"]{
+    --bg-app:#f0f2f5;
+    --bg-page:#e4e7eb;
+    --bg-panel:#ffffff;
+    --bg-elevated:#ffffff;
+    --bg-input:#f0f2f5;
+    --bg-hover:#f5f6f6;
+    --border:#e9edef;
+    --text-primary:#111b21;
+    --text-secondary:#54656f;
+    --text-tertiary:#8696a0;
+    --accent:#008069;
+    --accent-dark:#00644f;
+    --accent-contrast:#ffffff;
+    --mark-bg:rgba(0,128,105,0.16);
+    --mark-text:#00644f;
+    --shadow-frame: 0 40px 90px -25px rgba(20,30,40,0.35), 0 10px 30px -12px rgba(20,30,40,0.2);
+  }
+  :root{
+    --ai-blue:#4599ff;
+    --ai-violet:#a26bfa;
+    --ai-gradient: linear-gradient(135deg, var(--ai-blue), var(--ai-violet));
+    --ease: cubic-bezier(.22,.9,.32,1);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% 10%, rgba(69,153,255,0.16), transparent 60%),
+      radial-gradient(ellipse 600px 500px at 85% 90%, rgba(162,107,250,0.14), transparent 60%),
+      var(--bg-page);
+    color:var(--text-primary);
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:48px 20px 70px;
+    transition: background-color .4s var(--ease), color .4s var(--ease);
+  }
+
+  /* ============ PAGE HEADER (portfolio chrome, outside the "app") ============ */
+  .page-heading{
+    text-align:center;
+    max-width:520px;
+    margin-bottom:28px;
+  }
+  .page-heading .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ai-violet);
+    background:rgba(162,107,250,0.12);
+    border:1px solid rgba(162,107,250,0.3);
+    padding:5px 12px;
+    border-radius:20px;
+    margin-bottom:14px;
+  }
+  .page-heading h1{
+    font-size:26px;
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+    font-weight:700;
+  }
+  .page-heading p{
+    margin:0;
+    font-size:14.5px;
+    color:var(--text-secondary);
+    line-height:1.5;
+  }
+
+  /* ============ PHONE FRAME ============ */
+  .phone-shell{
+    position:relative;
+    width:390px;
+    max-width:100%;
+    border-radius:46px;
+    padding:14px;
+    background:linear-gradient(160deg,#2b2f33,#131517);
+    box-shadow: var(--shadow-frame);
+  }
+  .phone-screen{
+    position:relative;
+    width:100%;
+    height:800px;
+    max-height:82vh;
+    border-radius:34px;
+    overflow:hidden;
+    background:var(--bg-app);
+    display:flex;
+    flex-direction:column;
+    transition: background-color .4s var(--ease);
+  }
+  .notch{
+    position:absolute;
+    top:10px; left:50%; transform:translateX(-50%);
+    width:120px; height:26px;
+    background:#000;
+    border-radius:16px;
+    z-index:50;
+  }
+  .statusbar{
+    height:46px;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 26px 0 22px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text-primary);
+    position:relative;
+    z-index:20;
+  }
+  .statusbar .icons{ display:flex; align-items:center; gap:5px; }
+  .statusbar svg{ display:block; }
+
+  /* ============ APP AREA ============ */
+  .app{
+    position:relative;
+    flex:1;
+    overflow:hidden;
+  }
+  .page{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg-app);
+    transition: transform .42s var(--ease), opacity .3s var(--ease);
+  }
+  #page-settings{
+    transform: translateX(100%);
+    z-index:30;
+  }
+  #page-settings.open{
+    transform: translateX(0);
+  }
+
+  .app-header{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:6px 14px;
+    background:var(--bg-panel);
+    border-bottom:1px solid var(--border);
+  }
+  .header-title{
+    flex:1;
+    font-size:17px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .ai-badge{
+    width:26px;height:26px;
+    border-radius:50%;
+    background:var(--ai-gradient);
+    display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;
+    box-shadow:0 0 0 3px rgba(162,107,250,0.15);
+  }
+  .ai-badge svg{ width:14px;height:14px; }
+
+  .icon-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--text-primary);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition: background-color .2s var(--ease), transform .15s var(--ease);
+    flex:0 0 auto;
+  }
+  .icon-btn:hover{ background:var(--bg-hover); }
+  .icon-btn:active{ transform:scale(0.88); }
+  .icon-btn svg{ width:20px; height:20px; }
+
+  /* ============ SEARCH BAR ============ */
+  .search-wrap{
+    position:relative;
+    padding:10px 12px;
+    background:var(--bg-panel);
+    flex:0 0 auto;
+  }
+  .search-bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--bg-input);
+    border-radius:10px;
+    padding:0 10px;
+    height:42px;
+    transition: box-shadow .25s var(--ease), background-color .3s var(--ease);
+  }
+  .search-bar.focused{
+    box-shadow: 0 0 0 2px var(--ai-blue), 0 0 18px -4px rgba(69,153,255,0.5);
+  }
+  .search-bar svg.search-icon{ color:var(--text-tertiary); flex:0 0 auto; }
+  .search-bar input{
+    flex:1;
+    border:none;
+    outline:none;
+    background:transparent;
+    color:var(--text-primary);
+    font-size:14.5px;
+    font-family:inherit;
+    height:100%;
+    min-width:0;
+  }
+  .search-bar input::placeholder{ color:var(--text-tertiary); transition:opacity .3s; }
+  .bar-btn{
+    flex:0 0 auto;
+    width:30px;height:30px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--text-secondary);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition: background-color .2s, color .2s, transform .15s;
+  }
+  .bar-btn:hover{ background:var(--bg-hover); color:var(--text-primary); }
+  .bar-btn:active{ transform:scale(0.85); }
+  .bar-btn.mic.listening{
+    color:#fff;
+    background:var(--ai-gradient);
+    animation: micPulse 1s ease-in-out infinite;
+  }
+  @keyframes micPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(162,107,250,0.5); }
+    50%{ box-shadow:0 0 0 8px rgba(162,107,250,0); }
+  }
+
+  /* suggestions dropdown */
+  .suggest-dropdown{
+    position:absolute;
+    left:12px; right:12px; top:56px;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    border-radius:12px;
+    box-shadow:0 18px 40px -12px rgba(0,0,0,0.45);
+    overflow:hidden;
+    z-index:40;
+    opacity:0;
+    transform:translateY(-6px);
+    pointer-events:none;
+    transition: opacity .2s var(--ease), transform .2s var(--ease);
+  }
+  .suggest-dropdown.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+  .suggest-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 14px;
+    font-size:13.5px;
+    color:var(--text-primary);
+    cursor:pointer;
+    transition: background-color .15s;
+  }
+  .suggest-item:hover{ background:var(--bg-hover); }
+  .suggest-item svg{ flex:0 0 auto; color:var(--text-tertiary); }
+  .suggest-item b{ color:var(--ai-violet); font-weight:600; }
+
+  /* ============ FILTER CHIPS ============ */
+  .filter-row{
+    display:flex;
+    gap:8px;
+    padding:0 12px 12px;
+    background:var(--bg-panel);
+    overflow-x:auto;
+    flex:0 0 auto;
+    scrollbar-width:none;
+  }
+  .filter-row::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:0 0 auto;
+    padding:7px 14px;
+    border-radius:20px;
+    background:var(--bg-input);
+    color:var(--text-secondary);
+    font-size:12.5px;
+    font-weight:600;
+    border:1px solid transparent;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition: background-color .2s var(--ease), color .2s var(--ease), transform .12s var(--ease);
+    white-space:nowrap;
+  }
+  .chip:active{ transform:scale(0.94); }
+  .chip .count{
+    background:rgba(0,0,0,0.18);
+    border-radius:10px;
+    padding:1px 6px;
+    font-size:11px;
+  }
+  .chip.active{
+    background:var(--accent);
+    color:#fff;
+  }
+  .chip.active .count{ background:rgba(255,255,255,0.25); }
+
+  /* ============ CONTENT AREA ============ */
+  .content-area{
+    flex:1;
+    overflow-y:auto;
+    position:relative;
+  }
+  .content-inner{
+    opacity:1;
+    transform:translateY(0);
+    transition: opacity .28s var(--ease), transform .28s var(--ease);
+  }
+  .content-inner.fading{
+    opacity:0;
+    transform:translateY(8px);
+  }
+
+  /* ---- Home / empty suggestions ---- */
+  .home-state{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding:46px 30px 30px;
+  }
+  .orb{
+    width:64px;height:64px;
+    border-radius:50%;
+    background:var(--ai-gradient);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;
+    box-shadow:0 0 0 8px rgba(162,107,250,0.08);
+    animation: floaty 3.4s ease-in-out infinite;
+  }
+  .orb svg{ width:28px;height:28px; color:#fff; }
+  @keyframes floaty{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-6px); }
+  }
+  .home-state h2{
+    font-size:18px;
+    margin:0 0 6px;
+    font-weight:700;
+  }
+  .home-state p{
+    font-size:13.5px;
+    color:var(--text-secondary);
+    margin:0 0 22px;
+    line-height:1.5;
+    max-width:280px;
+  }
+  .section-label{
+    align-self:flex-start;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--text-tertiary);
+    margin:0 0 10px;
+  }
+  .suggestion-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-bottom:26px;
+  }
+  .sugg-chip{
+    padding:9px 14px;
+    border-radius:18px;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    color:var(--text-primary);
+    font-size:13px;
+    cursor:pointer;
+    transition: border-color .2s var(--ease), transform .15s var(--ease), background-color .2s;
+  }
+  .sugg-chip:hover{ border-color:var(--ai-violet); background:var(--bg-hover); }
+  .sugg-chip:active{ transform:scale(0.95); }
+
+  .recent-row{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .recent-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 4px;
+    text-align:left;
+    cursor:pointer;
+    border-radius:8px;
+    transition:background-color .15s;
+  }
+  .recent-item:hover{ background:var(--bg-hover); }
+  .recent-item svg{ color:var(--text-tertiary); flex:0 0 auto; }
+  .recent-item span{ font-size:13.5px; color:var(--text-primary); }
+
+  /* ---- Loading state ---- */
+  .loading-state{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:70px 40px;
+    text-align:center;
+  }
+  .loading-orb{
+    width:72px;height:72px;
+    border-radius:50%;
+    position:relative;
+    margin-bottom:26px;
+  }
+  .loading-orb::before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:50%;
+    background:var(--ai-gradient);
+    filter:blur(0px);
+    animation: pulseScale 1.6s ease-in-out infinite;
+  }
+  .loading-orb::after{
+    content:"";
+    position:absolute; inset:-8px;
+    border-radius:50%;
+    border:2px solid transparent;
+    border-top-color:var(--ai-blue);
+    border-right-color:var(--ai-violet);
+    animation: spin 1.1s linear infinite;
+  }
+  @keyframes pulseScale{
+    0%,100%{ transform:scale(0.92); opacity:0.9; }
+    50%{ transform:scale(1.05); opacity:1; }
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .loading-steps{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:flex-start;
+    margin-top:6px;
+  }
+  .loading-step{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:13.5px;
+    color:var(--text-tertiary);
+    opacity:0.4;
+    transition: opacity .3s var(--ease), color .3s var(--ease);
+  }
+  .loading-step.active{ opacity:1; color:var(--text-primary); }
+  .loading-step .dot{
+    width:16px;height:16px;
+    border-radius:50%;
+    border:2px solid var(--text-tertiary);
+    flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+    transition:border-color .3s, background-color .3s;
+  }
+  .loading-step.active .dot{ border-color:var(--accent); background:var(--accent); }
+  .loading-step.active .dot svg{ width:10px;height:10px; color:#fff; }
+
+  /* ---- AI summary card ---- */
+  .ai-summary{
+    margin:12px 12px 4px;
+    padding:14px 14px;
+    border-radius:14px;
+    background:
+      linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box,
+      var(--ai-gradient) border-box;
+    border:1.5px solid transparent;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    animation: fadeInUp .4s var(--ease) both;
+  }
+  .ai-summary .badge{
+    width:28px;height:28px;
+    border-radius:50%;
+    background:var(--ai-gradient);
+    flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ai-summary .badge svg{ width:15px;height:15px; color:#fff; }
+  .ai-summary .txt{ font-size:13.5px; line-height:1.5; color:var(--text-primary); }
+  .ai-summary .txt b{ color:var(--ai-violet); }
+  .ai-summary .mode-tag{
+    display:inline-block;
+    margin-top:6px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:var(--text-tertiary);
+  }
+
+  /* ---- Results list ---- */
+  .results-list{ padding:6px 4px 24px; }
+  .result-card{
+    display:flex;
+    gap:12px;
+    padding:11px 14px;
+    cursor:pointer;
+    position:relative;
+    animation: fadeInUp .38s var(--ease) both;
+    transition: background-color .15s;
+  }
+  .result-card:hover{ background:var(--bg-hover); }
+  @keyframes fadeInUp{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .result-card.is-top::before{
+    content:"Best match";
+    position:absolute;
+    top:8px; right:14px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:#fff;
+    background:var(--ai-gradient);
+    padding:3px 8px;
+    border-radius:8px;
+  }
+  .avatar{
+    position:relative;
+    flex:0 0 auto;
+    width:46px;height:46px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    font-weight:700;
+    font-size:15px;
+  }
+  .type-badge{
+    position:absolute;
+    right:-2px; bottom:-2px;
+    width:19px;height:19px;
+    border-radius:50%;
+    background:var(--bg-panel);
+    border:2px solid var(--bg-app);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .type-badge svg{ width:10px;height:10px; }
+  .type-badge.type-file svg{ color:#4599ff; }
+  .type-badge.type-link svg{ color:#00a884; }
+  .type-badge.type-image svg{ color:#f5a623; }
+  .type-badge.type-chat svg{ color:#8696a0; }
+
+  .result-body{ flex:1; min-width:0; }
+  .result-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:8px;
+  }
+  .chat-name{ font-size:14.5px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .timestamp{ font-size:11.5px; color:var(--text-tertiary); flex:0 0 auto; }
+  .result-sub{ font-size:11.5px; color:var(--ai-violet); margin:1px 0 3px; font-weight:600; }
+  .result-snippet{
+    font-size:13px;
+    color:var(--text-secondary);
+    line-height:1.4;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .result-snippet mark{
+    background:var(--mark-bg);
+    color:var(--mark-text);
+    border-radius:3px;
+    padding:0 2px;
+  }
+  .file-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:5px;
+    padding:5px 9px;
+    background:var(--bg-input);
+    border-radius:8px;
+    font-size:12px;
+    color:var(--text-primary);
+  }
+  .file-chip svg{ color:var(--ai-blue); flex:0 0 auto; }
+
+  /* ---- Empty state (no results) ---- */
+  .empty-state{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding:60px 34px;
+  }
+  .empty-icon{
+    width:60px;height:60px;
+    border-radius:50%;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;
+    color:var(--text-tertiary);
+  }
+  .empty-state h3{ font-size:15.5px; margin:0 0 6px; }
+  .empty-state p{ font-size:13px; color:var(--text-secondary); margin:0 0 18px; line-height:1.5; }
+  .hint-btn{
+    border:none;
+    background:var(--ai-gradient);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    padding:10px 18px;
+    border-radius:20px;
+    cursor:pointer;
+    transition: transform .15s var(--ease), box-shadow .2s var(--ease);
+  }
+  .hint-btn:hover{ box-shadow:0 6px 18px -4px rgba(162,107,250,0.5); }
+  .hint-btn:active{ transform:scale(0.95); }
+
+  /* ============ SETTINGS ============ */
+  .settings-content{ flex:1; overflow-y:auto; padding:8px 0 30px; }
+  .settings-section{ padding:18px 18px 6px; }
+  .settings-section .s-label{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .settings-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:13px 4px;
+    border-bottom:1px solid var(--border);
+  }
+  .settings-row:last-child{ border-bottom:none; }
+  .settings-row .s-icon{
+    width:34px;height:34px;
+    border-radius:9px;
+    background:var(--bg-elevated);
+    display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;
+    color:var(--text-secondary);
+  }
+  .settings-row .s-text{ flex:1; min-width:0; }
+  .settings-row .s-title{ font-size:14.5px; font-weight:500; margin-bottom:2px; }
+  .settings-row .s-desc{ font-size:12px; color:var(--text-secondary); line-height:1.4; }
+
+  .switch{
+    flex:0 0 auto;
+    width:44px; height:26px;
+    background:var(--bg-input);
+    border-radius:14px;
+    position:relative;
+    cursor:pointer;
+    border:none;
+    transition: background-color .25s var(--ease);
+  }
+  .switch::after{
+    content:"";
+    position:absolute;
+    top:3px; left:3px;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,0.3);
+    transition: transform .25s var(--ease);
+  }
+  .switch.on{ background:var(--accent); }
+  .switch.on::after{ transform:translateX(18px); }
+  .switch.disabled{ opacity:0.6; cursor:not-allowed; }
+
+  .about-box{
+    margin:6px 18px 0;
+    padding:14px;
+    border-radius:12px;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    font-size:12px;
+    color:var(--text-secondary);
+    line-height:1.6;
+  }
+  .about-box b{ color:var(--text-primary); }
+
+  /* ============ RESULT PREVIEW SHEET ============ */
+  .sheet-overlay{
+    position:absolute; inset:0;
+    background:rgba(0,0,0,0.5);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s var(--ease);
+    z-index:60;
+    display:flex;
+    align-items:flex-end;
+  }
+  .sheet-overlay.show{ opacity:1; pointer-events:auto; }
+  .sheet{
+    width:100%;
+    background:var(--bg-panel);
+    border-radius:20px 20px 0 0;
+    padding:10px 16px 26px;
+    transform:translateY(100%);
+    transition: transform .35s var(--ease);
+  }
+  .sheet-overlay.show .sheet{ transform:translateY(0); }
+  .sheet-handle{
+    width:36px;height:4px;
+    background:var(--border);
+    border-radius:3px;
+    margin:2px auto 14px;
+  }
+  .sheet-header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .sheet-header .s-avatar{
+    width:38px;height:38px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+  }
+  .sheet-header .s-meta b{ display:block; font-size:14px; }
+  .sheet-header .s-meta span{ font-size:11.5px; color:var(--text-tertiary); }
+  .chat-bubble{
+    background:var(--accent-dark);
+    color:#e9edef;
+    border-radius:10px 10px 10px 2px;
+    padding:10px 12px;
+    font-size:13.5px;
+    line-height:1.45;
+    max-width:88%;
+    margin-bottom:8px;
+  }
+  :root[data-theme="light"] .chat-bubble{ background:#d9fdd3; color:#111b21; }
+  .chat-bubble .b-file{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.08);
+    padding:8px 10px; border-radius:8px; margin-top:6px;
+    font-size:12.5px;
+  }
+  .chat-bubble .b-time{
+    display:block; text-align:right; font-size:10.5px; opacity:0.65; margin-top:4px;
+  }
+  .sheet-close{
+    margin-top:14px;
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text-primary);
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background-color .2s;
+  }
+  .sheet-close:hover{ background:var(--bg-hover); }
+
+  /* ============ SCROLLBARS ============ */
+  .content-area::-webkit-scrollbar, .settings-content::-webkit-scrollbar{ width:5px; }
+  .content-area::-webkit-scrollbar-thumb, .settings-content::-webkit-scrollbar-thumb{
+    background:var(--border); border-radius:3px;
+  }
+
+  /* ============ FOOTER CAPTION ============ */
+  .footer-note{
+    margin-top:26px;
+    text-align:center;
+    font-size:12px;
+    color:var(--text-secondary);
+    max-width:400px;
+    opacity:0.8;
+  }
+
+  @media (max-width:460px){
+    body{ padding:16px 0 40px; }
+    .phone-shell{ width:100%; border-radius:0; padding:0; box-shadow:none; background:none; }
+    .phone-screen{ height:100vh; max-height:100vh; border-radius:0; }
+    .notch{ display:none; }
+    .page-heading{ padding:0 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="page-heading">
+    <span class="eyebrow">✨ Prototype</span>
+    <h1>WhatsApp Smart Search AI</h1>
+    <p>Search the way you actually remember things. Try the suggestions below, or open Settings and turn Smart Search off to see why keyword search fails today.</p>
+  </div>
+
+  <div class="phone-shell">
+    <div class="phone-screen">
+      <div class="notch"></div>
+
+      <div class="statusbar">
+        <span id="clock">9:41</span>
+        <div class="icons">
+          <svg viewBox="0 0 18 12" width="17" height="11" fill="none"><rect x="0" y="7" width="3" height="5" rx="0.5" fill="currentColor"/><rect x="5" y="4.5" width="3" height="7.5" rx="0.5" fill="currentColor"/><rect x="10" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
+          <svg viewBox="0 0 24 12" width="22" height="11" fill="none"><rect x="1" y="1" width="19" height="10" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="21.5" y="4" width="1.5" height="4" rx="0.7" fill="currentColor"/><rect x="2.5" y="2.5" width="14" height="7" rx="1.2" fill="currentColor"/></svg>
+        </div>
+      </div>
+
+      <div class="app" id="app">
+
+        <!-- ===================== MAIN SEARCH PAGE ===================== -->
+        <div class="page" id="page-search">
+          <header class="app-header">
+            <div class="header-title">
+              <span class="ai-badge">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L13.8 8.6L20 10.5L13.8 12.4L12 19L10.2 12.4L4 10.5L10.2 8.6L12 2Z" fill="white"/></svg>
+              </span>
+              Smart Search
+            </div>
+            <button class="icon-btn" id="settings-btn" aria-label="Open settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+          </header>
+
+          <div class="search-wrap">
+            <div class="search-bar" id="search-bar">
+              <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input id="search-input" type="text" autocomplete="off" placeholder="Try “resume I sent to professor”">
+              <button class="bar-btn" id="clear-btn" style="display:none" aria-label="Clear">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+              <button class="bar-btn mic" id="mic-btn" aria-label="Search by voice">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v4"/></svg>
+              </button>
+            </div>
+            <div class="suggest-dropdown" id="suggest-dropdown"></div>
+          </div>
+
+          <div class="filter-row" id="filter-row" style="display:none"></div>
+
+          <div class="content-area" id="content-area">
+            <div class="content-inner" id="content-inner"></div>
+          </div>
+        </div>
+
+        <!-- ===================== SETTINGS PAGE ===================== -->
+        <div class="page" id="page-settings">
+          <header class="app-header">
+            <button class="icon-btn" id="settings-back" aria-label="Back">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div class="header-title">Settings</div>
+          </header>
+
+          <div class="settings-content">
+            <div class="settings-section">
+              <div class="s-label">AI Search</div>
+              <div class="settings-row">
+                <div class="s-icon">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M12 2L13.8 8.6L20 10.5L13.8 12.4L12 19L10.2 12.4L4 10.5L10.2 8.6L12 2Z" fill="currentColor"/></svg>
+                </div>
+                <div class="s-text">
+                  <div class="s-title">Smart Search AI</div>
+                  <div class="s-desc">Understand what you mean, not just what you type.</div>
+                </div>
+                <button class="switch on" id="toggle-smart" role="switch" aria-checked="true"></button>
+              </div>
+              <div class="settings-row">
+                <div class="s-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke-linecap="round"/></svg>
+                </div>
+                <div class="s-text">
+                  <div class="s-title">On-device processing</div>
+                  <div class="s-desc">Always on. Your messages are never sent to a server to make search smarter.</div>
+                </div>
+                <button class="switch on disabled" aria-checked="true" aria-label="Always on"></button>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="s-label">Appearance</div>
+              <div class="settings-row">
+                <div class="s-icon" id="theme-icon-wrap">
+                  <svg id="theme-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                </div>
+                <div class="s-text">
+                  <div class="s-title">Dark mode</div>
+                  <div class="s-desc">Easier on the eyes, especially at night.</div>
+                </div>
+                <button class="switch on" id="toggle-theme" role="switch" aria-checked="true"></button>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="s-label">Search data</div>
+              <div class="settings-row">
+                <div class="s-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0l-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+                </div>
+                <div class="s-text">
+                  <div class="s-title">Clear recent searches</div>
+                  <div class="s-desc" id="recent-count-desc">No recent searches yet.</div>
+                </div>
+                <button class="hint-btn" id="clear-recent-btn" style="padding:7px 14px;font-size:12px;">Clear</button>
+              </div>
+            </div>
+
+            <div class="about-box">
+              <b>About this prototype</b><br>
+              Concept build for the "WhatsApp Smart Search AI" product case study. All chats, contacts, and files shown are fictional and used to demonstrate the interaction model only.
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== RESULT PREVIEW SHEET ===================== -->
+        <div class="sheet-overlay" id="sheet-overlay">
+          <div class="sheet" id="sheet-content"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">Tip: search “Amazon OA link”, then turn Smart Search AI off in Settings and search it again — that gap is the whole case study.</p>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ ICONS ============ */
+  const ICONS = {
+    file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1"/></svg>',
+    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-1 4A8.5 8.5 0 0 1 12 20a8.4 8.4 0 0 1-4-1L3 21l2-5a8.4 8.4 0 0 1-1-4 8.5 8.5 0 0 1 4.5-7.5A8.4 8.4 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5z"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+    noresult: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 8l6 6M14 8l-6 6"/></svg>',
+    sparkle: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2L13.8 8.6L20 10.5L13.8 12.4L12 19L10.2 12.4L4 10.5L10.2 8.6L12 2Z" fill="currentColor"/></svg>'
+  };
+
+  /* ============ MOCK DATA ============ */
+  const DATA = [
+    { id:1, type:'link', chatName:'SDE Placements 2026', sender:'Priya Sharma', initials:'PS', color:'#e0913a',
+      snippet:'Hey everyone! Sharing the Assessment Link for the Amazon SDE role — please fill before Friday 11:59 PM: bit.ly/amzn-sde-oa',
+      timestamp:'3 weeks ago', matchLabel:"Link shared in a group you're in",
+      keywords:['amazon','oa','online','assessment','link','sde','placement','job','coding','test','hiring','role'] },
+    { id:2, type:'file', chatName:'Prof. Mayank Thacker', sender:'You', initials:'MT', color:'#7c83fd',
+      snippet:'Sir, please find my updated resume attached for the ECL 312 project review.',
+      fileName:'Resume_Satyam_Chourasiya.pdf', timestamp:'2 months ago', matchLabel:'File sent to Prof. Mayank Thacker',
+      keywords:['resume','cv','professor','sir','teacher','project','submission','ecl','review'] },
+    { id:3, type:'file', chatName:'ECE Batch 2023-27', sender:'Ananya Verma', initials:'AV', color:'#00a884',
+      snippet:"Sharing notes for tomorrow's quiz — covers timers and interrupts in detail.",
+      fileName:'Embedded_Systems_Unit4_Notes.pdf', timestamp:'5 days ago', matchLabel:'File shared in ECE Batch 2023-27',
+      keywords:['embedded','systems','pdf','notes','microcontroller','unit4','quiz','timers','interrupts'] },
+    { id:4, type:'file', chatName:'Goa Trip 2025', sender:'Karan', initials:'K', color:'#eb5757',
+      snippet:'Booking confirmed! Check-in on the 14th, 3 nights, sea view room.',
+      fileName:'MakeMyTrip_Booking_Confirmation.pdf', timestamp:'6 months ago', matchLabel:'File shared in Goa Trip 2025',
+      keywords:['hotel','booking','goa','trip','makemytrip','confirmation','travel','vacation','checkin'] },
+    { id:5, type:'image', chatName:'Meera Textiles — Orders', sender:'Sneha (Customer)', initials:'SN', color:'#ff8a65',
+      snippet:'Hi! Can I get this saree in blue instead? Loved the design.',
+      timestamp:'1 week ago', matchLabel:'Photo from Sneha (Customer)',
+      keywords:['blue','saree','order','customer','photo','image','dress','design'] },
+    { id:6, type:'file', chatName:'HR — TalentBridge', sender:'Ritika (HR)', initials:'RB', color:'#26c6da',
+      snippet:'Congratulations! Please find the offer letter attached — let us know by Friday.',
+      fileName:'Offer_Letter_Aditi_Sharma.pdf', timestamp:'1 month ago', matchLabel:'File from HR — TalentBridge',
+      keywords:['offer','letter','hr','job','recruiter','congratulations','employment'] },
+    { id:7, type:'link', chatName:'College Announcements', sender:'Placement Cell', initials:'PC', color:'#9575cd',
+      snippet:'Google Form for internship registration is live, fill by Monday: forms.gle/xyz123',
+      timestamp:'2 weeks ago', matchLabel:'Link shared in College Announcements',
+      keywords:['google','form','internship','registration','placement','link'] },
+    { id:8, type:'chat', chatName:'Mom ❤️', sender:'Mom', initials:'M', color:'#f06292',
+      snippet:"Beta, don't forget to send the flight ticket PDF to your aunt too.",
+      timestamp:'3 days ago', matchLabel:'Message from Mom',
+      keywords:['flight','ticket','travel','family','reminder','pdf'] }
+  ];
+
+  const SUGGESTIONS = [
+    'Resume I sent to professor',
+    'Amazon OA link',
+    'Embedded Systems PDF',
+    'Hotel booking Goa trip'
+  ];
+
+  const STOPWORDS = new Set(['i','a','the','to','for','of','in','on','my','me','that','this','sent','send','was','is','link','it','an','and']);
+
+  /* ============ STATE ============ */
+  const state = {
+    query:'',
+    results:[],
+    filter:'all',
+    smartSearch:true,
+    theme:'dark',
+    recent:[],
+    listeningTimer:null
+  };
+
+  /* ============ DOM REFS ============ */
+  const el = {
+    root: document.documentElement,
+    input: document.getElementById('search-input'),
+    searchBar: document.getElementById('search-bar'),
+    clearBtn: document.getElementById('clear-btn'),
+    micBtn: document.getElementById('mic-btn'),
+    dropdown: document.getElementById('suggest-dropdown'),
+    filterRow: document.getElementById('filter-row'),
+    contentInner: document.getElementById('content-inner'),
+    settingsBtn: document.getElementById('settings-btn'),
+    settingsBack: document.getElementById('settings-back'),
+    pageSettings: document.getElementById('page-settings'),
+    toggleSmart: document.getElementById('toggle-smart'),
+    toggleTheme: document.getElementById('toggle-theme'),
+    themeIcon: document.getElementById('theme-icon'),
+    clearRecentBtn: document.getElementById('clear-recent-btn'),
+    recentCountDesc: document.getElementById('recent-count-desc'),
+    sheetOverlay: document.getElementById('sheet-overlay'),
+    sheetContent: document.getElementById('sheet-content'),
+    clock: document.getElementById('clock')
+  };
+
+  /* ============ CLOCK ============ */
+  function updateClock(){
+    const d = new Date();
+    let h = d.getHours(), m = d.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    el.clock.textContent = h + ':' + (m < 10 ? '0' : '') + m;
+  }
+  updateClock();
+  setInterval(updateClock, 15000);
+
+  /* ============ PLACEHOLDER ROTATION ============ */
+  let placeholderIdx = 0, placeholderTimer = null;
+  function startPlaceholderRotation(){
+    stopPlaceholderRotation();
+    placeholderTimer = setInterval(() => {
+      placeholderIdx = (placeholderIdx + 1) % SUGGESTIONS.length;
+      el.input.placeholder = 'Try “' + SUGGESTIONS[placeholderIdx] + '”';
+    }, 2600);
+  }
+  function stopPlaceholderRotation(){ if (placeholderTimer) clearInterval(placeholderTimer); }
+  startPlaceholderRotation();
+
+  /* ============ CONTENT RENDER HELPER (with fade) ============ */
+  function setContent(html){
+    el.contentInner.classList.add('fading');
+    setTimeout(() => {
+      el.contentInner.innerHTML = html;
+      el.contentInner.classList.remove('fading');
+    }, 160);
+  }
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+  function highlight(text, words){
+    if (!words || !words.length) return escapeHtml(text);
+    let safe = escapeHtml(text);
+    const uniq = [...new Set(words.filter(w => w.length > 1))];
+    uniq.sort((a,b) => b.length - a.length);
+    uniq.forEach(w => {
+      const re = new RegExp('(' + escapeRegExp(w) + ')', 'ig');
+      safe = safe.replace(re, '<mark>$1</mark>');
+    });
+    return safe;
+  }
+
+  /* ============ HOME STATE ============ */
+  function renderHome(){
+    const recentHtml = state.recent.length ? `
+      <div class="section-label" style="align-self:flex-start;margin-top:6px;">Recent</div>
+      <div class="recent-row">
+        ${state.recent.map(r => `
+          <div class="recent-item" data-query="${escapeHtml(r)}">
+            ${ICONS.clock}
+            <span>${escapeHtml(r)}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    setContent(`
+      <div class="home-state">
+        <div class="orb">${ICONS.sparkle}</div>
+        <h2>Search your chats</h2>
+        <p>Describe what you're looking for — not just the exact words someone used.</p>
+        <div class="section-label">Try asking</div>
+        <div class="suggestion-grid">
+          ${SUGGESTIONS.map(s => `<div class="sugg-chip" data-query="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('')}
+        </div>
+        ${recentHtml}
+      </div>
+    `);
+    el.filterRow.style.display = 'none';
+    attachHomeHandlers();
+  }
+
+  function attachHomeHandlers(){
+    el.contentInner.querySelectorAll('.sugg-chip, .recent-item').forEach(node => {
+      node.addEventListener('click', () => {
+        const q = node.getAttribute('data-query');
+        el.input.value = q;
+        hideDropdown();
+        runSearch(q);
+      });
+    });
+  }
+
+  /* ============ LOADING STATE ============ */
+  function renderLoading(){
+    setContent(`
+      <div class="loading-state">
+        <div class="loading-orb"></div>
+        <div class="loading-steps">
+          <div class="loading-step" data-step="0"><div class="dot"></div><span>Reading your query…</span></div>
+          <div class="loading-step" data-step="1"><div class="dot"></div><span>Searching chats, files &amp; links…</span></div>
+          <div class="loading-step" data-step="2"><div class="dot"></div><span>Ranking by relevance…</span></div>
+        </div>
+      </div>
+    `);
+    const steps = el.contentInner.querySelectorAll('.loading-step');
+    const timings = [150, 550, 1000];
+    timings.forEach((t, i) => {
+      setTimeout(() => {
+        if (steps[i]) {
+          steps[i].classList.add('active');
+          const dot = steps[i].querySelector('.dot');
+          dot.innerHTML = ICONS.check;
+        }
+      }, t);
+    });
+  }
+
+  /* ============ MATCHING LOGIC ============ */
+  function computeResults(query){
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const words = q.split(/\s+/).filter(w => w.length > 1 && !STOPWORDS.has(w));
+
+    return DATA.map(item => {
+      let score = 0;
+      if (state.smartSearch) {
+        const haystack = (item.keywords.join(' ') + ' ' + item.snippet + ' ' + item.chatName + ' ' + item.sender + ' ' + (item.fileName || '')).toLowerCase();
+        words.forEach(w => { if (haystack.includes(w)) score += 1; });
+        if (haystack.includes(q)) score += 2;
+      } else {
+        const literal = (item.snippet + ' ' + item.chatName + ' ' + item.sender + ' ' + (item.fileName || '')).toLowerCase();
+        if (literal.includes(q)) score = 3;
+      }
+      return { ...item, _score: score, _matchedWords: words };
+    }).filter(i => i._score > 0)
+      .sort((a,b) => b._score - a._score);
+  }
+
+  const TYPE_LABEL = { file:'file', link:'link', image:'photo', chat:'message' };
+
+  function buildSummary(query, results){
+    if (!results.length) return '';
+    const top = results[0];
+    const count = results.length;
+    return `Found <b>${count}</b> match${count > 1 ? 'es' : ''} for “${escapeHtml(query)}” — the closest is a ${TYPE_LABEL[top.type]}, ${top.matchLabel.toLowerCase()}, ${top.timestamp}.`;
+  }
+
+  /* ============ FILTER ROW ============ */
+  function renderFilterRow(results){
+    const counts = { all: results.length, file:0, link:0, image:0, chat:0 };
+    results.forEach(r => counts[r.type] = (counts[r.type] || 0) + 1);
+    const filters = [
+      { key:'all', label:'All' },
+      { key:'file', label:'Files' },
+      { key:'link', label:'Links' },
+      { key:'image', label:'Media' },
+      { key:'chat', label:'Chats' }
+    ].filter(f => f.key === 'all' || counts[f.key] > 0);
+
+    el.filterRow.innerHTML = filters.map(f => `
+      <div class="chip ${state.filter === f.key ? 'active' : ''}" data-filter="${f.key}">
+        ${f.label} <span class="count">${counts[f.key]}</span>
+      </div>
+    `).join('');
+    el.filterRow.style.display = results.length ? 'flex' : 'none';
+
+    el.filterRow.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        state.filter = chip.getAttribute('data-filter');
+        renderResults(state.results, state.query, false);
+        renderFilterRow(state.results);
+      });
+    });
+  }
+
+  /* ============ RESULTS STATE ============ */
+  function renderResults(results, query, animateFilterRow){
+    if (animateFilterRow !== false) renderFilterRow(results);
+
+    const filtered = state.filter === 'all' ? results : results.filter(r => r.type === state.filter);
+
+    if (!results.length) {
+      renderEmptyResults(query);
+      return;
+    }
+
+    const summary = buildSummary(query, results);
+    const modeTag = state.smartSearch ? 'Smart Search · on-device' : 'Literal keyword match only';
+
+    const cardsHtml = filtered.map((item, i) => {
+      const words = state.smartSearch ? item._matchedWords : [query];
+      const snippetHtml = highlight(item.snippet, words);
+      const fileHtml = item.fileName ? `
+        <div class="file-chip">${ICONS.file}<span>${escapeHtml(item.fileName)}</span></div>
+      ` : '';
+      return `
+        <div class="result-card ${i === 0 ? 'is-top' : ''}" style="animation-delay:${i * 55}ms" data-id="${item.id}">
+          <div class="avatar" style="background:${item.color}">
+            ${item.initials}
+            <span class="type-badge type-${item.type}">${ICONS[item.type]}</span>
+          </div>
+          <div class="result-body">
+            <div class="result-top">
+              <span class="chat-name">${escapeHtml(item.chatName)}</span>
+              <span class="timestamp">${item.timestamp}</span>
+            </div>
+            <div class="result-sub">${escapeHtml(item.matchLabel)}</div>
+            <div class="result-snippet">${snippetHtml}</div>
+            ${fileHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    setContent(`
+      <div class="ai-summary">
+        <div class="badge">${ICONS.sparkle}</div>
+        <div class="txt">${summary}<span class="mode-tag">${modeTag}</span></div>
+      </div>
+      <div class="results-list">${cardsHtml || `<div style="padding:30px;text-align:center;color:var(--text-tertiary);font-size:13px;">No results in this filter.</div>`}</div>
+    `);
+
+    el.contentInner.querySelectorAll('.result-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = parseInt(card.getAttribute('data-id'), 10);
+        const item = DATA.find(d => d.id === id);
+        openSheet(item);
+      });
+    });
+  }
+
+  /* ============ EMPTY RESULTS STATE ============ */
+  function renderEmptyResults(query){
+    el.filterRow.style.display = 'none';
+    const smartOffHint = !state.smartSearch ? `
+      <button class="hint-btn" id="enable-smart-hint">Turn on Smart Search AI</button>
+    ` : `
+      <p style="margin-top:-8px;">Try describing who sent it, what it was for, or roughly when.</p>
+    `;
+    setContent(`
+      <div class="empty-state">
+        <div class="empty-icon">${ICONS.noresult}</div>
+        <h3>No matches for “${escapeHtml(query)}”</h3>
+        <p>${state.smartSearch ? "That's unusual — try rephrasing, or use one of the suggestions from the home screen." : "Smart Search AI is off, so only exact text is matched — this is the exact gap the case study is about."}</p>
+        ${smartOffHint}
+      </div>
+    `);
+    const hintBtn = document.getElementById('enable-smart-hint');
+    if (hintBtn) {
+      hintBtn.addEventListener('click', () => {
+        setSmartSearch(true);
+        runSearch(state.query);
+      });
+    }
+  }
+
+  /* ============ SEARCH FLOW ============ */
+  function runSearch(query){
+    query = query.trim();
+    if (!query) { renderHome(); return; }
+    state.query = query;
+    addRecent(query);
+    hideDropdown();
+    state.filter = 'all';
+    renderLoading();
+    setTimeout(() => {
+      const results = computeResults(query);
+      state.results = results;
+      renderResults(results, query);
+    }, 1250);
+  }
+
+  function addRecent(q){
+    state.recent = state.recent.filter(r => r.toLowerCase() !== q.toLowerCase());
+    state.recent.unshift(q);
+    state.recent = state.recent.slice(0, 4);
+    updateRecentDesc();
+  }
+
+  function updateRecentDesc(){
+    el.recentCountDesc.textContent = state.recent.length
+      ? state.recent.length + ' saved on this device'
+      : 'No recent searches yet.';
+  }
+
+  /* ============ SUGGESTIONS DROPDOWN (while typing) ============ */
+  function showDropdown(value){
+    const v = value.trim().toLowerCase();
+    if (!v) { hideDropdown(); return; }
+    const matches = SUGGESTIONS.filter(s => s.toLowerCase().includes(v));
+    let html = matches.slice(0, 3).map(s => `
+      <div class="suggest-item" data-query="${escapeHtml(s)}">
+        ${ICONS.search}
+        <span>${escapeHtml(s)}</span>
+      </div>
+    `).join('');
+    html += `
+      <div class="suggest-item" data-query="${escapeHtml(value)}">
+        ${ICONS.sparkle}
+        <span>Search for “<b>${escapeHtml(value)}</b>”</span>
+      </div>
+    `;
+    el.dropdown.innerHTML = html;
+    el.dropdown.classList.add('show');
+    el.dropdown.querySelectorAll('.suggest-item').forEach(item => {
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const q = item.getAttribute('data-query');
+        el.input.value = q;
+        runSearch(q);
+      });
+    });
+  }
+  function hideDropdown(){ el.dropdown.classList.remove('show'); el.dropdown.innerHTML = ''; }
+
+  /* ============ RESULT PREVIEW SHEET ============ */
+  function openSheet(item){
+    const fileBlock = item.fileName ? `
+      <div class="b-file">${ICONS.file}<span>${escapeHtml(item.fileName)}</span></div>
+    ` : '';
+    el.sheetContent.innerHTML = `
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="s-avatar" style="background:${item.color}">${item.initials}</div>
+        <div class="s-meta">
+          <b>${escapeHtml(item.chatName)}</b>
+          <span>Jumped to message · ${item.timestamp}</span>
+        </div>
+      </div>
+      <div class="chat-bubble">
+        ${escapeHtml(item.snippet)}
+        ${fileBlock}
+        <span class="b-time">${item.timestamp} ✓✓</span>
+      </div>
+      <button class="sheet-close" id="sheet-close-btn">Close</button>
+    `;
+    el.sheetOverlay.classList.add('show');
+    document.getElementById('sheet-close-btn').addEventListener('click', closeSheet);
+  }
+  function closeSheet(){ el.sheetOverlay.classList.remove('show'); }
+  el.sheetOverlay.addEventListener('click', (e) => { if (e.target === el.sheetOverlay) closeSheet(); });
+
+  /* ============ SETTINGS ============ */
+  function setSmartSearch(on){
+    state.smartSearch = on;
+    el.toggleSmart.classList.toggle('on', on);
+    el.toggleSmart.setAttribute('aria-checked', on);
+  }
+  el.toggleSmart.addEventListener('click', () => {
+    setSmartSearch(!state.smartSearch);
+    if (state.query) runSearch(state.query);
+  });
+
+  function setTheme(theme){
+    state.theme = theme;
+    el.root.setAttribute('data-theme', theme);
+    el.toggleTheme.classList.toggle('on', theme === 'dark');
+    el.themeIcon.innerHTML = theme === 'dark'
+      ? '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'
+      : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  }
+  el.toggleTheme.addEventListener('click', () => setTheme(state.theme === 'dark' ? 'light' : 'dark'));
+
+  el.clearRecentBtn.addEventListener('click', () => {
+    state.recent = [];
+    updateRecentDesc();
+    if (!state.query) renderHome();
+  });
+
+  el.settingsBtn.addEventListener('click', () => el.pageSettings.classList.add('open'));
+  el.settingsBack.addEventListener('click', () => el.pageSettings.classList.remove('open'));
+
+  /* ============ SEARCH BAR EVENTS ============ */
+  el.input.addEventListener('focus', () => {
+    el.searchBar.classList.add('focused');
+    stopPlaceholderRotation();
+    if (el.input.value) showDropdown(el.input.value);
+  });
+  el.input.addEventListener('blur', () => {
+    el.searchBar.classList.remove('focused');
+    setTimeout(hideDropdown, 120);
+    if (!el.input.value) startPlaceholderRotation();
+  });
+  el.input.addEventListener('input', () => {
+    el.clearBtn.style.display = el.input.value ? 'flex' : 'none';
+    if (el.input.value.trim()) showDropdown(el.input.value); else { hideDropdown(); renderHome(); }
+  });
+  el.input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { runSearch(el.input.value); el.input.blur(); }
+  });
+  el.clearBtn.addEventListener('click', () => {
+    el.input.value = '';
+    el.clearBtn.style.display = 'none';
+    hideDropdown();
+    state.query = '';
+    renderHome();
+    el.input.focus();
+  });
+
+  /* Mic fake-listening interaction */
+  el.micBtn.addEventListener('click', () => {
+    if (el.micBtn.classList.contains('listening')) return;
+    el.micBtn.classList.add('listening');
+    const pick = SUGGESTIONS[Math.floor(Math.random() * SUGGESTIONS.length)];
+    state.listeningTimer = setTimeout(() => {
+      el.micBtn.classList.remove('listening');
+      el.input.value = pick;
+      el.clearBtn.style.display = 'flex';
+      runSearch(pick);
+    }, 1500);
+  });
+
+  /* ============ INIT ============ */
+  renderHome();
+  updateRecentDesc();
+})();
+</script>
+</body>
+</html>
