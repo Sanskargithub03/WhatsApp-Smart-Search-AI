@@ -6,80 +6,105 @@
 
 **Find messages the way you remember them, not the way they were written.**
 
-<br>
+---
+
+## 🚀 Live Interactive Prototype
+
+# 🌐 https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/
+
+<p align="center">
 
 <a href="https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/">
-    <img src="https://img.shields.io/badge/🚀%20LIVE%20DEMO-Try%20the%20Prototype-6C63FF?style=for-the-badge" />
+<img src="https://img.shields.io/badge/🚀%20Live%20Demo-Try%20Now-success?style=for-the-badge"/>
 </a>
 
 <a href="https://github.com/Sanskargithub03/WhatsApp-Smart-Search-AI">
-    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" />
+<img src="https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github"/>
 </a>
 
-<a href="https://www.linkedin.com/in/satyam-chourasiya/">
-    <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin" />
+<a href="https://www.linkedin.com/in/sanskar-yede-b61798294">
+<img src="https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin"/>
 </a>
+
+</p>
+
+---
+
+### ⭐ Product Management Case Study
+
+Designed to reimagine WhatsApp Search using **AI-powered Semantic Search**, enabling users to retrieve messages, documents, links and media using **natural language** instead of exact keywords.
 
 </div>
 
 ---
 
-# 🚀 Live Interactive Prototype
+# 🌍 Live Demo
 
-## 👉 **Try it here**
+## 👉 Experience the Interactive Prototype
 
-# **🌐 https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/**
-
-> Experience the complete interactive prototype directly in your browser.
+### **https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/**
 
 ---
 
 # 📖 Overview
 
-WhatsApp has evolved into much more than a messaging platform. Today, people use it to store resumes, internship links, assignment PDFs, invoices, travel tickets, project documents and other important information.
+WhatsApp has evolved into much more than a messaging platform.
 
-However, its search experience still relies heavily on **exact keyword matching**, while users naturally remember **context** instead of filenames or exact messages.
+Today, users store
 
-This project explores how **AI-powered Semantic Search** can make retrieving information effortless using natural language.
+- 📄 Resumes
+- 📚 Assignment PDFs
+- 💼 Internship Links
+- 📑 Project Documents
+- ✈️ Tickets
+- 🧾 Invoices
+- 📸 Images
+- 🔗 Important Links
 
-### Example
+inside conversations.
+
+However, WhatsApp Search still depends on **exact keyword matching**, while users naturally remember **context** instead of filenames or exact messages.
+
+This project redesigns WhatsApp Search using **AI-powered Semantic Search**.
 
 Instead of searching
 
-```
+```text
 resume.pdf
 ```
 
-Users can simply type
+Users can simply search
 
-```
+```text
 Resume I sent to professor
 ```
 
 or
 
-```
+```text
 Amazon OA Link
 ```
 
 or
 
-```
+```text
 Embedded Systems PDF
 ```
+
+AI understands intent and surfaces the most relevant results instantly.
 
 ---
 
 # 🎯 Problem Statement
 
-Current WhatsApp Search depends on exact keywords.
+Current WhatsApp Search relies on **exact keyword matching**.
 
 Users generally remember
 
 - 👤 Who sent the file
-- 💼 Why it was shared
 - 📄 What it was about
-- 📅 Roughly when it was shared
+- 💼 Why it was shared
+- 📅 Approximately when it was shared
 
 instead of
 
@@ -88,27 +113,27 @@ instead of
 - ❌ Exact message
 - ❌ Exact date
 
-As a result, users spend significant time manually scrolling through conversations.
+As a result, users spend several minutes manually scrolling through chats.
 
 ---
 
 # 💡 Proposed Solution
 
-Introduce an **AI-powered Semantic Search** layer capable of understanding **user intent** instead of exact text.
+Introduce an AI-powered **Semantic Search Engine** capable of understanding **user intent** rather than exact keywords.
 
-The system interprets natural language queries and ranks conversations based on contextual relevance.
+The search engine interprets natural language queries and retrieves results ranked by contextual relevance.
 
 ---
 
 # ✨ Key Features
 
 - 🔍 Natural Language Search
-- 🤖 AI-powered Semantic Search
-- 📄 Smart Document Retrieval
-- 🔗 Link Discovery
-- 📷 Media Search
+- 🤖 AI-powered Semantic Retrieval
+- 📄 Smart Document Search
+- 🔗 Intelligent Link Discovery
+- 🖼️ Media Search
 - 📑 AI Summary Cards
-- 🎯 Context-based Ranking
+- 🎯 Context-aware Ranking
 - 🌙 Dark Mode Support
 - ⚡ Interactive HTML Prototype
 - 🔒 Privacy-first Product Design
@@ -117,9 +142,9 @@ The system interprets natural language queries and ranks conversations based on 
 
 # 🧠 Product Thinking
 
-Current Experience
+## Current Experience
 
-```
+```text
 Remember exact keyword
 
 ↓
@@ -132,14 +157,22 @@ No Results
 
 ↓
 
-Scroll Manually
+Try Again
+
+↓
+
+Scroll Chats
+
+↓
+
+Find Document
 ```
 
 ---
 
-Proposed Experience
+## Proposed Experience
 
-```
+```text
 Remember Context
 
 ↓
@@ -152,7 +185,15 @@ AI Understands Intent
 
 ↓
 
-Relevant Results Instantly
+Semantic Search
+
+↓
+
+Relevant Results
+
+↓
+
+Done ✅
 ```
 
 ---
@@ -161,55 +202,68 @@ Relevant Results Instantly
 
 - 🎓 Students
 - 💼 Working Professionals
-- 🧑‍💻 Recruiters
 - 🚀 Startup Teams
+- 🧑‍💻 Recruiters
 - 🏢 Small Businesses
 
 ---
 
 # 📊 Success Metrics
 
-### ⭐ North Star Metric
+## ⭐ North Star Metric
 
 **Search Success Rate**
+
+---
 
 ### Supporting Metrics
 
 - Average Search Time
+- Daily AI Searches
 - Result Click Rate
 - Repeat Usage
-- Daily AI Searches
+- Successful Retrieval Rate
+
+---
 
 ### Guardrail Metrics
 
 - Search Latency
 - Wrong Result Rate
+- Battery Usage
 - Privacy Complaints
 
 ---
 
 # 🛠️ Tech Stack
 
-### Frontend
+## Frontend
 
 - HTML
 - CSS
 - JavaScript
 
-### Product
+---
+
+## Product
 
 - Product Thinking
 - UX Design
 - User Journey Mapping
 - MVP Planning
+- Product Strategy
 
-### AI Workflow
+---
+
+## AI Workflow
 
 - Semantic Search
 - Intent Understanding
 - Context-based Ranking
 
-### Tools Used
+---
+
+## Tools Used
 
 - Claude
 - ChatGPT
@@ -231,23 +285,21 @@ Relevant Results Instantly
 
 ---
 
-# 📑 Deliverables
+# 📦 Deliverables
 
 - ✅ Product Requirement Document (PRD)
 - ✅ Product Case Study
 - ✅ Interactive HTML Prototype
 - ✅ User Journey Mapping
-- ✅ MVP Definition
 - ✅ Product Metrics
-- ✅ Product Trade-off Analysis
+- ✅ MVP Definition
+- ✅ Product Trade-offs
 
 ---
 
-# 🌍 Live Demo
+# 🚀 Live Prototype
 
-## 🚀 Experience the Product
-
-### **https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/**
+### 🌐 https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/
 
 ---
 
@@ -257,23 +309,27 @@ Relevant Results Instantly
 - 🖼️ OCR-based Search
 - 🤖 Multimodal Search
 - 📸 Image Understanding
-- 🔄 Cross-device Semantic Sync
+- 🔄 Cross-device Semantic Search
 - 💡 AI Recommendations
 
 ---
 
 # 👨‍💻 About Me
 
-**Satyam Chourasiya**
+## **Sanskar Yede**
 
-Electronics & Communication Engineering Student
+Electronics & Communication Engineering Student  
+**Indian Institute of Information Technology (IIIT) Nagpur**
 
-Interested in
+Passionate about building AI-powered products and solving real-world user problems through **Product Management**, **UX Thinking**, and **Rapid Prototyping**.
 
-- Product Management
-- AI-powered Products
-- User Experience Design
-- Semiconductor Systems
+### Interests
+
+- 🚀 Product Management
+- 🤖 AI-powered Products
+- 💡 Product Strategy
+- 🎯 User Experience Design
+- ⚡ Rapid Prototyping
 
 ---
 
@@ -281,7 +337,7 @@ Interested in
 
 ### 💼 LinkedIn
 
-**https://www.linkedin.com/in/satyam-chourasiya/**
+**https://www.linkedin.com/in/sanskar-yede-b61798294**
 
 ### 💻 GitHub
 
@@ -293,8 +349,10 @@ Interested in
 
 # ⭐ If you found this project interesting, consider giving it a Star!
 
-### 🚀 Live Prototype
+## 🚀 Live Interactive Prototype
 
-## 🌐 https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/
+# 🌐 https://sanskargithub03.github.io/WhatsApp-Smart-Search-AI/
+
+**Built as a Product Management Case Study exploring AI-powered Semantic Search for Messaging Applications.**
 
 </div>
